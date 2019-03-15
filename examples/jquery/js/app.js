@@ -45,12 +45,12 @@ jQuery(function ($) {
 			this.footerTemplate = Handlebars.compile($('#footer-template').html());
 			this.bindEvents();
 
-			new Router({
+      			new Router({
 				'/:filter': function (filter) {
 					this.filter = filter;
-					this.render();
+					this.updateApp();
 				}.bind(this)
-			}).init('/all');
+			}).init('/all');      
 		},
 		bindEvents: function () {
 			$('#new-todo').on('keyup', this.create.bind(this));
@@ -70,8 +70,12 @@ jQuery(function ($) {
 			$('#toggle-all').prop('checked', this.getActiveTodos().length === 0);
 			this.renderFooter();
 			$('#new-todo').focus();
-			util.store('todos-jquery', this.todos);
 		},
+    		// Takes care of storage, and replaces all the calls to render in the app
+    		updateApp: function () {
+      			this.render();
+     	 		util.store('todos-jquery', this.todos);
+    		},
 		renderFooter: function () {
 			var todoCount = this.todos.length;
 			var activeTodoCount = this.getActiveTodos().length;
@@ -91,7 +95,7 @@ jQuery(function ($) {
 				todo.completed = isChecked;
 			});
 
-			this.render();
+			this.updateApp();
 		},
 		getActiveTodos: function () {
 			return this.todos.filter(function (todo) {
@@ -117,7 +121,7 @@ jQuery(function ($) {
 		destroyCompleted: function () {
 			this.todos = this.getActiveTodos();
 			this.filter = 'all';
-			this.render();
+			this.updateApp();
 		},
 		// accepts an element from inside the `.item` div and
 		// returns the corresponding index in the `todos` array
@@ -148,12 +152,12 @@ jQuery(function ($) {
 
 			$input.val('');
 
-			this.render();
+			this.updateApp();
 		},
 		toggle: function (e) {
 			var i = this.indexFromEl(e.target);
 			this.todos[i].completed = !this.todos[i].completed;
-			this.render();
+			this.updateApp();
 		},
 		edit: function (e) {
 			var $input = $(e.target).closest('li').addClass('editing').find('.edit');
@@ -184,11 +188,11 @@ jQuery(function ($) {
 				this.todos[this.indexFromEl(el)].title = val;
 			}
 
-			this.render();
+			this.updateApp();
 		},
 		destroy: function (e) {
 			this.todos.splice(this.indexFromEl(e.target), 1);
-			this.render();
+			this.updateApp();
 		}
 	};
 
